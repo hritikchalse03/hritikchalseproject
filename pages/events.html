@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Events - ATNT</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: #000000;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+        
+        /* Header */
+        .header {
+            background: #111111;
+            border-bottom: 1px solid #333333;
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+        }
+        
+        .logo {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-decoration: none;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: #9ca3af;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .nav-links a:hover, .nav-links a.active {
+            color: #3b82f6;
+        }
+        
+        .live-indicator {
+            background: #ef4444;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(135deg, #111111 0%, #1a1a1a 100%);
+            border-bottom: 1px solid #333333;
+            padding: 2rem 0;
+        }
+        
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .page-subtitle {
+            color: #9ca3af;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .header-stats {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+        
+        .stat-label {
+            color: #9ca3af;
+            font-size: 0.9rem;
+        }
+        
+        /* Main Content */
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+        }
+        
+        /* Sidebar Filters */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .filter-card {
+            background: #111111;
+            border: 1px solid #333333;
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        
+        .filter-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #ffffff;
+        }
+        
+        .filter-group {
+            margin-bottom: 1rem;
+        }
+        
+        .filter-label {
+            display: block;
+            color: #9ca3af;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .filter-select, .filter-input {
+            width: 100%;
+            background: #0a0a0a;
+            border: 1px solid #333333;
+            border-radius: 8px;
+            padding: 0.75rem;
+            color: #ffffff;
+            font-size: 0.9rem;
+        }
+        
+        .filter-select:focus, .filter-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        .filter-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .filter-checkbox input {
+            accent-color: #3b82f6;
+        }
+        
+        .filter-checkbox label {
+            color: #9ca3af;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        
+        /* View Toggle */
+        .view-toggle {
+            display: flex;
+            background: #0a0a0a;
+            border: 1px solid #333333;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .view-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #9ca3af;
+            padding: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .view-btn.active {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        /* Content Area */
+        .content-area {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .results-count {
+            color: #9ca3af;
+            font-size: 0.9rem;
+        }
+        
+        .sort-select {
+            background: #111111;
+            border: 1px solid #333333;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            color: #ffffff;
+            font-size: 0.9rem;
+        }
+        
+        /* Calendar View */
+        .calendar-view {
+            display: none;
+        }
+        
+        .calendar-view.active {
+            display: block;
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .nav-btn {
+            background: #111111;
+            border: 1px solid #333333;
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .nav-btn:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+        
+        .current-month {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #333333;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .calendar-header-cell {
+            background: #111111;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+            color: #9ca3af;
+        }
+        
+        .calendar-cell {
+            background: #0a0a0a;
+            min-height: 120px;
+            padding: 0.5rem;
+            position: relative;
+        }
+        
+        .calendar-cell.other-month {
+            background: #050505;
+            color: #555555;
+        }
+        
+        .calendar-date {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .calendar-event {
+            background: #1e3a8a;
+            color: #3b82f6;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            margin-bottom: 0.25rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .calendar-event:hover {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .calendar-event.live {
+            background: #dc2626;
+            color: #ffffff;
+            animation: pulse 2s infinite;
+        }
+        
+        /* List View */
+        .list-view {
+            display: block;
+        }
+        
+        .list-view.active {
+            display: block;
+        }
+        
+        .events-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .event-card {
+            background: #111111;
+            border: 1px solid #333333;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .event-card:hover {
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+        }
+        
+        .event-card.live {
+            border-color: #ef4444;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+        }
+        
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+        
+        .event-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .event-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .event-status.live {
+            background: #ef4444;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+        
+        .event-status.upcoming {
+            background: #1e3a8a;
+            color: #3b82f6;
+        }
+        
+        .event-status.completed {
+            background: #065f46;
+            color: #10b981;
+        }
+        
+        .event-time {
+            color: #9ca3af;
+            font-size: 0.9rem;
+        }
+        
+        .event-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .action-btn {
+            background: transparent;
+            border: 1px solid #333333;
+            color: #9ca3af;
+            padding: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+        }
+        
+        .action-btn:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+        
+        .action-btn.primary {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+        }
+        
+        .action-btn.primary:hover {
+            background: #2563eb;
+        }
+        
+        .event-content {
+            display: flex;
+            gap: 1.5rem;
+        }
+        
+        .event-details {
+            flex: 1;
+        }
+        
+        .event-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .event-company {
+            color: #3b82f6;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        
+        .event-description {
+            color: #9ca3af;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+        
+        .event-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .event-tag {
+            background: #1a1a1a;
+            color: #9ca3af;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+        }
+        
+        .event-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            min-width: 120px;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+        }
+        
+        .stat-row .label {
+            color: #9ca3af;
+        }
+        
+        .stat-row .value {
+            color: #ffffff;
+            font-weight: 500;
+        }
+        
+        /* Live Stream Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+        }
+        
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: #111111;
+            border: 1px solid #333333;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 1000px;
+            max-height: 90%;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid #333333;
+        }
+        
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: #9ca3af;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+        
+        .close-btn:hover {
+            color: #ffffff;
+        }
+        
+        .modal-body {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            overflow: hidden;
+        }
+        
+        .stream-area {
+            background: #0a0a0a;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .video-placeholder {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            color: #9ca3af;
+            font-size: 1.2rem;
+            min-height: 400px;
+        }
+        
+        .stream-controls {
+            padding: 1rem;
+            background: #111111;
+            border-top: 1px solid #333333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .control-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .control-btn {
+            background: transparent;
+            border: 1px solid #333333;
+            color: #9ca3af;
+            padding: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .control-btn:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+        
+        .volume-slider {
+            width: 80px;
+            accent-color: #3b82f6;
+        }
+        
+        .chat-area {
+            background: #0a0a0a;
+            border-left: 1px solid #333333;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-header {
+            padding: 1rem;
+            border-bottom: 1px solid #333333;
+            font-weight: 600;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+        
+        .chat-message {
+            margin-bottom: 1rem;
+        }
+        
+        .message-author {
+            font-weight: 600;
+            color: #3b82f6;
+            font-size: 0.8rem;
+        }
+        
+        .message-text {
+            color: #9ca3af;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+        
+        .message-time {
+            color: #555555;
+            font-size: 0.7rem;
+            margin-top: 0.25rem;
+        }
+        
+        .chat-input {
+            padding: 1rem;
+            border-top: 1px solid #333333;
+        }
+        
+        .chat-input input {
+            width: 100%;
+            background: #111111;
+            border: 1px solid #333333;
+            border-radius: 8px;
+            padding: 0.75rem;
+            color: #ffffff;
+            font-size: 0.9rem;
+        }
+        
+        .chat-input input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                display: none;
+            }
+            
+            .modal-body {
+                grid-template-columns: 1fr;
+            }
+            
+            .chat-area {
+                border-left: none;
+                border-top: 1px solid #333333;
+                max-height: 200px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header-container,
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .header-stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .event-content {
+                flex-direction: column;
+            }
+            
+            .event-stats {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="nav-container">
+            <a href="../index.html" class="logo">ATNT</a>
+            <nav class="nav-links">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="company.html">Companies</a>
+                <a href="#" class="active">Live Events</a>
+                <a href="search.html">Search</a>
+            </nav>
+            <div class="live-indicator">🔴 3 LIVE</div>
+        </div>
+    </header>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="header-container">
+            <h1 class="page-title">Live Events</h1>
+            <p class="page-subtitle">Real-time earnings calls, conferences, and investor meetings</p>
+            
+            <div class="header-stats">
+                <div class="stat-item">
+                    <span class="stat-value">3</span>
+                    <span class="stat-label">Live Now</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">12</span>
+                    <span class="stat-label">Today</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">47</span>
+                    <span class="stat-label">This Week</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">1,234</span>
+                    <span class="stat-label">Total Attendees</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Sidebar Filters -->
+        <div class="sidebar">
+            <div class="filter-card">
+                <div class="filter-title">View</div>
+                <div class="view-toggle">
+                    <button class="view-btn active" onclick="switchView('list')">List</button>
+                    <button class="view-btn" onclick="switchView('calendar')">Calendar</button>
+                </div>
+            </div>
+            
+            <div class="filter-card">
+                <div class="filter-title">Filters</div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Status</label>
+                    <select class="filter-select" onchange="filterEvents()">
+                        <option value="">All Events</option>
+                        <option value="live">Live Now</option>
+                        <option value="upcoming">Upcoming</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Event Type</label>
+                    <div class="filter-checkbox">
+                        <input type="checkbox" id="earnings" checked>
+                        <label for="earnings">Earnings Calls</label>
+                    </div>
+                    <div class="filter-checkbox">
+                        <input type="checkbox" id="conferences" checked>
+                        <label for="conferences">Conferences</label>
+                    </div>
+                    <div class="filter-checkbox">
+                        <input type="checkbox" id="meetings" checked>
+                        <label for="meetings">Investor Meetings</label>
+                    </div>
+                    <div class="filter-checkbox">
+                        <input type="checkbox" id="presentations" checked>
+                        <label for="presentations">Presentations</label>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Company</label>
+                    <input type="text" class="filter-input" placeholder="Search companies..." onkeyup="filterEvents()">
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Date Range</label>
+                    <input type="date" class="filter-input" style="margin-bottom: 0.5rem;">
+                    <input type="date" class="filter-input">
+                </div>
+            </div>
+            
+            <div class="filter-card">
+                <div class="filter-title">Quick Actions</div>
+                <button class="action-btn primary" style="width: 100%; margin-bottom: 0.5rem;" onclick="subscribeToAlerts()">
+                    🔔 Subscribe to Alerts
+                </button>
+                <button class="action-btn" style="width: 100%; margin-bottom: 0.5rem;" onclick="exportCalendar()">
+                    📅 Export Calendar
+                </button>
+                <button class="action-btn" style="width: 100%;" onclick="viewArchive()">
+                    📁 View Archive
+                </button>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <div class="content-header">
+                <div class="results-count">Showing 24 events</div>
+                <select class="sort-select" onchange="sortEvents()">
+                    <option value="time">Sort by Time</option>
+                    <option value="company">Sort by Company</option>
+                    <option value="importance">Sort by Importance</option>
+                </select>
+            </div>
+            
+            <!-- List View -->
+            <div class="list-view active" id="listView">
+                <div class="events-list">
+                    <!-- Live Event -->
+                    <div class="event-card live" onclick="joinLiveStream('apple-q4-2024')">
+                        <div class="event-header">
+                            <div class="event-meta">
+                                <span class="event-status live">🔴 LIVE</span>
+                                <span class="event-time">Started 15 min ago</span>
+                            </div>
+                            <div class="event-actions">
+                                <button class="action-btn primary">Join Live</button>
+                                <button class="action-btn">🔔</button>
+                                <button class="action-btn">📋</button>
+                            </div>
+                        </div>
+                        <div class="event-content">
+                            <div class="event-details">
+                                <div class="event-company">Apple Inc. (AAPL)</div>
+                                <div class="event-title">Q4 2024 Earnings Call</div>
+                                <div class="event-description">
+                                    Apple reports Q4 2024 results with record revenue of $94.9B. CEO Tim Cook and CFO Luca Maestri discuss iPhone 15 performance, Services growth, and AI initiatives.
+                                </div>
+                                <div class="event-tags">
+                                    <span class="event-tag">Earnings</span>
+                                    <span class="event-tag">Technology</span>
+                                    <span class="event-tag">Large Cap</span>
+                                </div>
+                            </div>
+                            <div class="event-stats">
+                                <div class="stat-row">
+                                    <span class="label">Attendees:</span>
+                                    <span class="value">1,247</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="label">Duration:</span>
+                                    <span class="value">60 min</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="label">Language:</span>
+                                    <span class="value">English</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Upcoming Event -->
+                    <div class="event-card" onclick="setReminder('microsoft-conference')">
+                        <div class="event-header">
+                            <div class="event-meta">
+                                <span class="event-status upcoming">📅 UPCOMING</span>
+                                <span class="event-time">Today, 2:00 PM EST</span>
+                            </div>
+                            <div class="event-actions">
+                                <button class="action-btn primary">Set Reminder</button>
+                                <button class="action-btn">🔔</button>
+                                <button class="action-btn">📋</button>
+                            </div>
+                        </div>
+                        <div class="event-content">
+                            <div class="event-details">
+                                <div class="event-company">Microsoft Corporation (MSFT)</div>
+                                <div class="event-title">Goldman Sachs Technology Conference</div>
+                                <div class="event-description">
+                                    Microsoft CEO Satya Nadella presents at Goldman Sachs Technology Conference. Expected topics include Azure growth, AI integration, and cloud strategy.
+                                </div>
+                                <div class="event-tags">
+                                    <span class="event-tag">Conference</span>
+                                    <span class="event-tag">Technology</span>
+                                    <span class="event-tag">Cloud</span>
+                                </div>
+                            </div>
+                            <div class="event-stats">
+                                <div class="stat-row">
+                                    <span class="label">Expected:</span>
+                                    <span class="value">800+</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="label">Duration:</span>
+                                    <span class="value">45 min</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="label">Language:</span>
+                                    <span class="value">English</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Another Live Event -->
+                    <div class="event-card live" onclick="joinLiveStream('tesla-investor')">
+                        <div class="event-header">
+                            <div class="event-meta">
+                                <span class="event-status live">🔴 LIVE</span>
+                                <span class="event-time">Started 32 min ago</span>
+                            </div>
+                            <div class="event-actions">
+                                <button class="action-btn primary">Join Live</button>
+                                <button class="action-btn">🔔</button>
+                                <button class="action-btn">📋</button>
+                            </div>
+                        </div>
+                        <div class="event-content">
+                            <div class="event-details">
+                                <div class="event-company">Tesla, Inc. (TSLA)</div>
+                                <div class="event-title">Investor Day Presentation</div>
+                                <div class="event-description">
+                                    Tesla presents latest developments in autonomous driving, energy storage, and manufacturing efficiency. Elon Musk discusses 2025 production targets.
+                                </div>
+                                <div class="event-tags">
+                                    <span class="event-tag">Investor Day</span>
+                                    <span class="event-tag">Automotive</span>
+                                    <span class="event-tag">Technology</span>
+                                </div>
+                            </div>
+                            <div class="event-stats">
+                                <div class="stat-row">
+                                    <span class="label">Attendees:</span>
+                                    <span class="value">2,156</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="label">Duration:</span>
+                                    <span class="value">90 min</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="label">Language:</span>
+                                    <span class="value">English</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Completed Event -->
+                    <div class="event-card" onclick="viewRecording('google-earnings')">
+                        <div class="event-header">
+                            <div class="event-meta">
+                                <span class="event-status completed">✅ COMPLETED</span>
+                                <span class="event-time">Yesterday, 4:30 PM EST</span>
+                            </div>
+                            <div class="event-actions">
+                                <button class="action-btn primary">View Recording</button>
+                                <button class="action-btn">📄</button>
+                                <button class="action-btn">📊</button>
+                            </div>
+                        </div>
+                        <div class="event-content">
+                            <div class="event-details">
+                                <div class="event-company">Alphabet Inc. (GOOGL)</div>
+                                <div class="event-title">Q4 2024 Earnings Call</div>
+                                <div class="event-description">
+                                    Alphabet reported strong Q4 results with $86.2B revenue. Discussion focused on Search performance, YouTube growth, and Cloud expansion.
+                                </div>
+                                <div class="event-tags">
+                                    <span class="event-tag">Earnings</span>
+                                    <span class="event-tag">Technology</span>
+                                    <span class="event-tag">Search</span>
+                                </div>
+                            </div>
+                            <div class="event-stats">
+                                <div class="stat-row">
+                                    <span class="label">Attended:</span>
+                                    <span class="value">1,543</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="label">Duration:</span>
+                                    <span class="value">52 min</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="label">Recording:</span>
+                                    <span class="value">Available</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- More upcoming events -->
+                    <div class="event-card">
+                        <div class="event-header">
+                            <div class="event-meta">
+                                <span class="event-status upcoming">📅 UPCOMING</span>
+                                <span class="event-time">Tomorrow, 9:30 AM EST</span>
+                            </div>
+                            <div class="event-actions">
+                                <button class="action-btn primary">Set Reminder</button>
+                                <button class="action-btn">🔔</button>
+                                <button class="action-btn">📋</button>
+                            </div>
+                        </div>
+                        <div class="event-content">
+                            <div class="event-details">
+                                <div class="event-company">Amazon.com Inc. (AMZN)</div>
+                                <div class="event-title">AWS re:Invent Keynote</div>
+                                <div class="event-description">
+                                    Amazon Web Services announces new cloud services, AI capabilities, and partnership updates at their annual re:Invent conference.
+                                </div>
+                                <div class="event-tags">
+                                    <span class="event-tag">Keynote</span>
+                                    <span class="event-tag">Cloud</span>
+                                    <span class="event-tag">AI</span>
+                                </div>
+                            </div>
+                            <div class="event-stats">
+                                <div class="stat-row">
+                                    <span class="label">Expected:</span>
+                                    <span class="value">5,000+</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="label">Duration:</span>
+                                    <span class="value">120 min</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="label">Language:</span>
+                                    <span class="value">English</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Calendar View -->
+            <div class="calendar-view" id="calendarView">
+                <div class="calendar-header">
+                    <div class="calendar-nav">
+                        <button class="nav-btn" onclick="previousMonth()">← Previous</button>
+                        <div class="current-month">December 2024</div>
+                        <button class="nav-btn" onclick="nextMonth()">Next →</button>
+                    </div>
+                    <button class="nav-btn" onclick="goToToday()">Today</button>
+                </div>
+                
+                <div class="calendar-grid">
+                    <div class="calendar-header-cell">Sun</div>
+                    <div class="calendar-header-cell">Mon</div>
+                    <div class="calendar-header-cell">Tue</div>
+                    <div class="calendar-header-cell">Wed</div>
+                    <div class="calendar-header-cell">Thu</div>
+                    <div class="calendar-header-cell">Fri</div>
+                    <div class="calendar-header-cell">Sat</div>
+                    
+                    <!-- Calendar cells (simplified for demo) -->
+                    <div class="calendar-cell other-month"><div class="calendar-date">24</div></div>
+                    <div class="calendar-cell other-month"><div class="calendar-date">25</div></div>
+                    <div class="calendar-cell other-month"><div class="calendar-date">26</div></div>
+                    <div class="calendar-cell other-month"><div class="calendar-date">27</div></div>
+                    <div class="calendar-cell other-month"><div class="calendar-date">28</div></div>
+                    <div class="calendar-cell other-month"><div class="calendar-date">29</div></div>
+                    <div class="calendar-cell other-month"><div class="calendar-date">30</div></div>
+                    
+                    <div class="calendar-cell"><div class="calendar-date">1</div></div>
+                    <div class="calendar-cell"><div class="calendar-date">2</div></div>
+                    <div class="calendar-cell"><div class="calendar-date">3</div></div>
+                    <div class="calendar-cell"><div class="calendar-date">4</div></div>
+                    <div class="calendar-cell"><div class="calendar-date">5</div></div>
+                    <div class="calendar-cell"><div class="calendar-date">6</div></div>
+                    <div class="calendar-cell"><div class="calendar-date">7</div></div>
+                    
+                    <div class="calendar-cell"><div class="calendar-date">8</div></div>
+                    <div class="calendar-cell"><div class="calendar-date">9</div></div>
+                    <div class="calendar-cell"><div class="calendar-date">10</div></div>
+                    <div class="calendar-cell"><div class="calendar-date">11</div></div>
+                    <div class="calendar-cell"><div class="calendar-date">12</div></div>
+                    <div class="calendar-cell"><div class="calendar-date">13</div></div>
+                    <div class="calendar-cell"><div class="calendar-date">14</div></div>
+                    
+                    <div class="calendar-cell">
+                        <div class="calendar-date">15</div>
+                        <div class="calendar-event live">Apple Q4 Earnings</div>
+                        <div class="calendar-event">MSFT Conference</div>
+                    </div>
+                    <div class="calendar-cell">
+                        <div class="calendar-date">16</div>
+                        <div class="calendar-event live">Tesla Investor Day</div>
+                    </div>
+                    <div class="calendar-cell">
+                        <div class="calendar-date">17</div>
+                        <div class="calendar-event">Amazon Keynote</div>
+                    </div>
+                    <div class="calendar-cell"><div class="calendar-date">18</div></div>
+                    <div class="calendar-cell"><div class="calendar-date">19</div></div>
+                    <div class="calendar-cell"><div class="calendar-date">20</div></div>
+                    <div class="calendar-cell"><div class="calendar-date">21</div></div>
+                    
+                    <div class="calendar-cell"><div class="calendar-date">22</div></div>
+                    <div class="calendar-cell"><div class="calendar-date">23</div></div>
+                    <div class="calendar-cell"><div class="calendar-date">24</div></div>
+                    <div class="calendar-cell"><div class="calendar-date">25</div></div>
+                    <div class="calendar-cell"><div class="calendar-date">26</div></div>
+                    <div class="calendar-cell"><div class="calendar-date">27</div></div>
+                    <div class="calendar-cell"><div class="calendar-date">28</div></div>
+                    
+                    <div class="calendar-cell"><div class="calendar-date">29</div></div>
+                    <div class="calendar-cell"><div class="calendar-date">30</div></div>
+                    <div class="calendar-cell"><div class="calendar-date">31</div></div>
+                    <div class="calendar-cell other-month"><div class="calendar-date">1</div></div>
+                    <div class="calendar-cell other-month"><div class="calendar-date">2</div></div>
+                    <div class="calendar-cell other-month"><div class="calendar-date">3</div></div>
+                    <div class="calendar-cell other-month"><div class="calendar-date">4</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Stream Modal -->
+    <div class="modal" id="streamModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">🔴 Apple Inc. Q4 2024 Earnings Call - LIVE</div>
+                <button class="close-btn" onclick="closeStream()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="stream-area">
+                    <div class="video-placeholder">
+                        🎥 Live Audio Stream<br>
+                        <small style="margin-top: 1rem; display: block;">Real-time transcription will appear here</small>
+                    </div>
+                    <div class="stream-controls">
+                        <div class="control-group">
+                            <button class="control-btn" id="playPauseBtn" onclick="togglePlayPause()">⏸️</button>
+                            <button class="control-btn" onclick="toggleMute()">🔊</button>
+                            <input type="range" class="volume-slider" min="0" max="100" value="75">
+                        </div>
+                        <div class="control-group">
+                            <span style="color: #9ca3af; font-size: 0.9rem;">1,247 listeners</span>
+                        </div>
+                        <div class="control-group">
+                            <button class="control-btn" onclick="downloadTranscript()">📄</button>
+                            <button class="control-btn" onclick="shareStream()">📤</button>
+                            <button class="control-btn" onclick="toggleFullscreen()">⛶</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-area">
+                    <div class="chat-header">
+                        Live Chat (234 participants)
+                    </div>
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="chat-message">
+                            <div class="message-author">InvestorPro</div>
+                            <div class="message-text">Strong revenue numbers! 📈</div>
+                            <div class="message-time">2 min ago</div>
+                        </div>
+                        <div class="chat-message">
+                            <div class="message-author">AnalystMike</div>
+                            <div class="message-text">iPhone sales beat expectations</div>
+                            <div class="message-time">1 min ago</div>
+                        </div>
+                        <div class="chat-message">
+                            <div class="message-author">TechWatcher</div>
+                            <div class="message-text">Services growth is impressive 🚀</div>
+                            <div class="message-time">30 sec ago</div>
+                        </div>
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" placeholder="Type a message..." onkeypress="sendMessage(event)">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentView = 'list';
+        let isPlaying = true;
+        
+        function switchView(view) {
+            currentView = view;
+            
+            // Update buttons
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update views
+            document.getElementById('listView').classList.remove('active');
+            document.getElementById('calendarView').classList.remove('active');
+            
+            if (view === 'list') {
+                document.getElementById('listView').classList.add('active');
+            } else {
+                document.getElementById('calendarView').classList.add('active');
+            }
+        }
+        
+        function joinLiveStream(eventId) {
+            document.getElementById('streamModal').classList.add('active');
+            console.log('Joining live stream:', eventId);
+            
+            // Simulate real-time chat updates
+            startChatSimulation();
+        }
+        
+        function closeStream() {
+            document.getElementById('streamModal').classList.remove('active');
+            stopChatSimulation();
+        }
+        
+        function togglePlayPause() {
+            const btn = document.getElementById('playPauseBtn');
+            isPlaying = !isPlaying;
+            btn.textContent = isPlaying ? '⏸️' : '▶️';
+        }
+        
+        function toggleMute() {
+            alert('🔇 Audio muted/unmuted');
+        }
+        
+        function toggleFullscreen() {
+            alert('⛶ Fullscreen mode (would expand video area)');
+        }
+        
+        function downloadTranscript() {
+            alert('📄 Downloading live transcript...\n\n• Real-time transcript with timestamps\n• Speaker identification\n• Key highlights marked\n• Searchable format');
+        }
+        
+        function shareStream() {
+            alert('📤 Share this live stream:\n\n• Copy link to clipboard\n• Share on social media\n• Send to colleagues\n• Embed in reports');
+        }
+        
+        let chatInterval;
+        const chatMessages = [
+            { author: 'MarketGuru', text: 'Guidance looks strong for next quarter', time: 'now' },
+            { author: 'InvestorJane', text: 'Apple Intelligence adoption is key', time: 'now' },
+            { author: 'TechAnalyst', text: 'Services margin expansion impressive', time: 'now' },
+            { author: 'PortfolioMgr', text: 'China sales recovery noted 🇨🇳', time: 'now' },
+            { author: 'RetailInvestor', text: 'When is the next product launch?', time: 'now' }
+        ];
+        
+        function startChatSimulation() {
+            let messageIndex = 0;
+            chatInterval = setInterval(() => {
+                if (messageIndex < chatMessages.length) {
+                    addChatMessage(chatMessages[messageIndex]);
+                    messageIndex++;
+                } else {
+                    // Reset and continue with random messages
+                    messageIndex = 0;
+                }
+            }, 3000);
+        }
+        
+        function stopChatSimulation() {
+            if (chatInterval) {
+                clearInterval(chatInterval);
+            }
+        }
+        
+        function addChatMessage(message) {
+            const chatContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message';
+            messageDiv.innerHTML = `
+                <div class="message-author">${message.author}</div>
+                <div class="message-text">${message.text}</div>
+                <div class="message-time">${message.time}</div>
+            `;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        function sendMessage(event) {
+            if (event.key === 'Enter') {
+                const input = event.target;
+                if (input.value.trim()) {
+                    addChatMessage({
+                        author: 'You',
+                        text: input.value,
+                        time: 'now'
+                    });
+                    input.value = '';
+                }
+            }
+        }
+        
+        function setReminder(eventId) {
+            alert('🔔 Reminder set for Microsoft Conference!\n\n• Email notification 30 min before\n• Push notification 5 min before\n• Calendar event added\n• Pre-event briefing available');
+        }
+        
+        function viewRecording(eventId) {
+            window.location.href = 'transcript.html';
+        }
+        
+        function filterEvents() {
+            alert('🔍 Filtering events...\n\n• Status filter applied\n• Company search active\n• Date range updated\n• Results refreshed');
+        }
+        
+        function sortEvents() {
+            alert('📊 Sorting events...\n\n• Order updated\n• Preferences saved\n• View refreshed');
+        }
+        
+        function subscribeToAlerts() {
+            alert('🔔 Subscribe to Event Alerts:\n\n• New earnings calls posted\n• Live events starting soon\n• Companies you follow\n• Custom keyword alerts\n• Daily/weekly summaries');
+        }
+        
+        function exportCalendar() {
+            alert('📅 Export Calendar:\n\n• iCal format (.ics)\n• Google Calendar integration\n• Outlook compatibility\n• Custom date ranges\n• Filtered events only');
+        }
+        
+        function viewArchive() {
+            alert('📁 Event Archive:\n\n• Historical earnings calls\n• Past conferences\n• Searchable transcripts\n• Performance analytics\n• Trend analysis');
+        }
+        
+        function previousMonth() {
+            alert('📅 Previous month loaded');
+        }
+        
+        function nextMonth() {
+            alert('📅 Next month loaded');
+        }
+        
+        function goToToday() {
+            alert('📅 Jumped to today');
+        }
+        
+        // Close modal when clicking outside
+        document.getElementById('streamModal').addEventListener('click', (e) => {
+            if (e.target.id === 'streamModal') {
+                closeStream();
+            }
+        });
+        
+        console.log('🎥 ATNT Live Events System Loaded');
+        console.log('📡 Real-time streaming ready');
+        console.log('💬 Live chat active');
+        console.log('📅 Calendar view available');
+        console.log('🔔 Day 7: Live Events Complete');
+    </script>
+</body>
+</html>
