@@ -1,38 +1,28 @@
 {
-  "name": "financestream",
+  "name": "atnt-platform",
   "version": "1.0.0",
   "description": "A comprehensive financial research platform providing live earnings calls and real-time transcripts",
-  "private": true,
-  "workspaces": [
-    "backend/*",
-    "frontend/*"
-  ],
+  "main": "server.js",
   "scripts": {
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:backend": "cd backend/api-gateway && npm run dev",
-    "dev:frontend": "cd frontend/web && npm run dev",
-    "build": "npm run build:backend && npm run build:frontend",
-    "build:backend": "cd backend/api-gateway && npm run build",
-    "build:frontend": "cd frontend/web && npm run build",
-    "test": "npm run test:backend && npm run test:frontend",
-    "test:backend": "cd backend/api-gateway && npm test",
-    "test:frontend": "cd frontend/web && npm test",
-    "lint": "npm run lint:backend && npm run lint:frontend",
-    "lint:backend": "cd backend/api-gateway && npm run lint",
-    "lint:frontend": "cd frontend/web && npm run lint",
-    "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down",
-    "db:migrate": "cd backend/api-gateway && npm run db:migrate",
-    "db:seed": "cd backend/api-gateway && npm run db:seed",
-    "setup": "npm install && npm run docker:up && npm run db:migrate && npm run db:seed"
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "install-deps": "npm install",
+    "setup": "npm install && echo 'Setup complete! Run npm start to launch ATNT platform'"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "socket.io": "^4.7.4",
+    "axios": "^1.6.2",
+    "dotenv": "^16.3.1"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2",
-    "@types/node": "^20.10.0",
-    "typescript": "^5.3.0"
+    "nodemon": "^3.0.2"
   },
   "engines": {
-    "node": ">=18.0.0",
+    "node": ">=16.0.0",
     "npm": ">=8.0.0"
   },
   "keywords": [
@@ -41,8 +31,12 @@
     "transcription",
     "investor-relations",
     "real-time",
-    "streaming"
+    "streaming",
+    "backend",
+    "api",
+    "nodejs",
+    "express"
   ],
-  "author": "FinanceStream Team",
+  "author": "ATNT Team",
   "license": "MIT"
 }
