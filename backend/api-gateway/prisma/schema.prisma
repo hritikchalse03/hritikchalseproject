@@ -1,0 +1,393 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Management
+model User {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  password          String
+  firstName         String?
+  lastName          String?
+  avatar            String?
+  emailVerified     Boolean  @default(false)
+  subscriptionTier  SubscriptionTier @default(FREE)
+  subscriptionId    String?
+  stripeCustomerId  String?  @unique
+  isActive          Boolean  @default(true)
+  lastLoginAt       DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  watchlist         Watchlist[]
+  projects          Project[]
+  alerts            Alert[]
+  sessions          Session[]
+  apiKeys           ApiKey[]
+  subscriptions     Subscription[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model ApiKey {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  key         String   @unique
+  isActive    Boolean  @default(true)
+  lastUsedAt  DateTime?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("api_keys")
+}
+
+// Subscription Management
+model Subscription {
+  id                String           @id @default(cuid())
+  userId            String
+  tier              SubscriptionTier
+  status            SubscriptionStatus
+  stripeSubscriptionId String?       @unique
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean         @default(false)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+// Company Data
+model Company {
+  id            String   @id @default(cuid())
+  symbol        String   @unique
+  name          String
+  exchange      String
+  sector        String?
+  industry      String?
+  marketCap     BigInt?
+  description   String?
+  website       String?
+  logoUrl       String?
+  isActive      Boolean  @default(true)
+  country       String?
+  currency      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  events        Event[]
+  watchlists    Watchlist[]
+  financials    Financial[]
+
+  @@map("companies")
+}
+
+// Events (Earnings calls, conferences, etc.)
+model Event {
+  id            String    @id @default(cuid())
+  companyId     String
+  type          EventType
+  title         String
+  description   String?
+  scheduledAt   DateTime
+  startedAt     DateTime?
+  endedAt       DateTime?
+  status        EventStatus @default(SCHEDULED)
+  webcastUrl    String?
+  dialInNumber  String?
+  passcode      String?
+  isLive        Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  recordings    Recording[]
+  transcripts   Transcript[]
+  documents     Document[]
+
+  @@map("events")
+}
+
+// Audio Recordings
+model Recording {
+  id            String        @id @default(cuid())
+  eventId       String
+  fileName      String
+  fileSize      BigInt
+  duration      Int?          // in seconds
+  audioUrl      String
+  status        RecordingStatus @default(PROCESSING)
+  quality       AudioQuality  @default(STANDARD)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relations
+  event         Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  transcripts   Transcript[]
+
+  @@map("recordings")
+}
+
+// Transcripts
+model Transcript {
+  id            String    @id @default(cuid())
+  eventId       String
+  recordingId   String?
+  content       String    // Full transcript text
+  speakers      Json?     // Speaker identification data
+  timestamps    Json?     // Timestamp data for each segment
+  confidence    Float?    // AI confidence score
+  language      String    @default("en")
+  status        TranscriptStatus @default(PROCESSING)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  event         Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  recording     Recording? @relation(fields: [recordingId], references: [id], onDelete: SetNull)
+  segments      TranscriptSegment[]
+
+  @@map("transcripts")
+}
+
+// Transcript Segments (for better search and navigation)
+model TranscriptSegment {
+  id            String    @id @default(cuid())
+  transcriptId  String
+  speaker       String?
+  content       String
+  startTime     Float     // in seconds
+  endTime       Float     // in seconds
+  confidence    Float?
+  createdAt     DateTime  @default(now())
+
+  transcript    Transcript @relation(fields: [transcriptId], references: [id], onDelete: Cascade)
+
+  @@map("transcript_segments")
+}
+
+// Documents (earnings reports, presentations, etc.)
+model Document {
+  id            String      @id @default(cuid())
+  eventId       String?
+  companyId     String?
+  type          DocumentType
+  title         String
+  fileName      String
+  fileUrl       String
+  fileSize      BigInt
+  mimeType      String
+  pageCount     Int?
+  extractedText String?     // For searchability
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // Relations
+  event         Event?      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@map("documents")
+}
+
+// Financial Data
+model Financial {
+  id            String      @id @default(cuid())
+  companyId     String
+  period        String      // e.g., "Q1 2024", "FY 2023"
+  periodType    PeriodType  // QUARTERLY, ANNUAL
+  fiscalYear    Int
+  quarter       Int?
+  revenue       BigInt?
+  netIncome     BigInt?
+  eps           Float?
+  reportedAt    DateTime
+  createdAt     DateTime    @default(now())
+
+  company       Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, period])
+  @@map("financials")
+}
+
+// User Features
+model Watchlist {
+  id            String   @id @default(cuid())
+  userId        String
+  companyId     String
+  createdAt     DateTime @default(now())
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, companyId])
+  @@map("watchlists")
+}
+
+model Project {
+  id            String   @id @default(cuid())
+  userId        String
+  name          String
+  description   String?
+  isPublic      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items         ProjectItem[]
+
+  @@map("projects")
+}
+
+model ProjectItem {
+  id            String      @id @default(cuid())
+  projectId     String
+  type          ProjectItemType
+  title         String
+  content       String?
+  metadata      Json?       // Store references to events, documents, etc.
+  order         Int         @default(0)
+  createdAt     DateTime    @default(now())
+
+  project       Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("project_items")
+}
+
+model Alert {
+  id            String      @id @default(cuid())
+  userId        String
+  type          AlertType
+  keywords      String[]
+  companyIds    String[]
+  isActive      Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notifications AlertNotification[]
+
+  @@map("alerts")
+}
+
+model AlertNotification {
+  id            String      @id @default(cuid())
+  alertId       String
+  title         String
+  message       String
+  metadata      Json?
+  isRead        Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+
+  alert         Alert       @relation(fields: [alertId], references: [id], onDelete: Cascade)
+
+  @@map("alert_notifications")
+}
+
+// Enums
+enum SubscriptionTier {
+  FREE
+  CORE
+  PRO
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  UNPAID
+}
+
+enum EventType {
+  EARNINGS_CALL
+  CONFERENCE_CALL
+  INVESTOR_MEETING
+  ANNUAL_MEETING
+  SPECIAL_EVENT
+  WEBINAR
+  PRESENTATION
+}
+
+enum EventStatus {
+  SCHEDULED
+  LIVE
+  COMPLETED
+  CANCELED
+  POSTPONED
+}
+
+enum RecordingStatus {
+  PROCESSING
+  COMPLETED
+  FAILED
+  ARCHIVED
+}
+
+enum AudioQuality {
+  LOW
+  STANDARD
+  HIGH
+  PREMIUM
+}
+
+enum TranscriptStatus {
+  PROCESSING
+  COMPLETED
+  FAILED
+  REVIEWING
+}
+
+enum DocumentType {
+  EARNINGS_REPORT
+  PRESENTATION
+  PRESS_RELEASE
+  SEC_FILING
+  ANNUAL_REPORT
+  QUARTERLY_REPORT
+  OTHER
+}
+
+enum PeriodType {
+  QUARTERLY
+  ANNUAL
+}
+
+enum ProjectItemType {
+  NOTE
+  TRANSCRIPT_EXCERPT
+  DOCUMENT_REFERENCE
+  AUDIO_CLIP
+  LINK
+}
+
+enum AlertType {
+  KEYWORD_MENTION
+  COMPANY_EVENT
+  EARNINGS_CALL
+  PRICE_MOVEMENT
+}

@@ -1,0 +1,121 @@
+{
+  "name": "atnt-platform",
+  "version": "1.0.0",
+  "description": "Enterprise-grade financial research platform - Professional backend API",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "build": "npm run lint && npm run test",
+    "test": "jest --coverage --detectOpenHandles",
+    "test:watch": "jest --watch",
+    "test:integration": "jest --testPathPattern=integration",
+    "lint": "eslint src/ --ext .js",
+    "lint:fix": "eslint src/ --ext .js --fix",
+    "format": "prettier --write src/",
+    "db:migrate": "knex migrate:latest",
+    "db:seed": "knex seed:run",
+    "db:rollback": "knex migrate:rollback",
+    "db:reset": "npm run db:rollback && npm run db:migrate && npm run db:seed",
+    "docker:build": "docker build -t atnt-platform .",
+    "docker:run": "docker-compose up -d",
+    "docker:stop": "docker-compose down",
+    "logs": "pm2 logs",
+    "monitor": "pm2 monit",
+    "validate": "npm run lint && npm run test && npm audit",
+    "precommit": "npm run validate",
+    "setup": "npm install && npm run db:migrate && npm run db:seed && echo 'ATNT Platform setup complete!'"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "express-validator": "^7.0.1",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "compression": "^1.7.4",
+    "morgan": "^1.10.0",
+    "winston": "^3.11.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "passport-local": "^1.0.0",
+    "knex": "^3.0.1",
+    "pg": "^8.11.3",
+    "redis": "^4.6.10",
+    "multer": "^1.4.5",
+    "sharp": "^0.32.6",
+    "pdf-parse": "^1.1.1",
+    "openai": "^4.20.1",
+    "socket.io": "^4.7.4",
+    "axios": "^1.6.2",
+    "node-cron": "^3.0.3",
+    "joi": "^17.11.0",
+    "dotenv": "^16.3.1",
+    "uuid": "^9.0.1",
+    "moment": "^2.29.4",
+    "lodash": "^4.17.21",
+    "@sentry/node": "^7.81.1",
+    "swagger-ui-express": "^5.0.0",
+    "swagger-jsdoc": "^6.2.8",
+    "bull": "^4.12.2",
+    "ioredis": "^5.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "eslint": "^8.55.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.29.0",
+    "prettier": "^3.1.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0",
+    "@types/jest": "^29.5.8",
+    "cross-env": "^7.0.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "keywords": [
+    "finance",
+    "earnings",
+    "transcription",
+    "investor-relations",
+    "real-time",
+    "streaming",
+    "backend",
+    "api",
+    "nodejs",
+    "express",
+    "postgresql",
+    "enterprise",
+    "professional"
+  ],
+  "author": "ATNT Development Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/atnt/platform.git"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coverageDirectory": "coverage",
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/server.js",
+      "!src/config/*.js"
+    ],
+    "testMatch": [
+      "**/__tests__/**/*.js",
+      "**/?(*.)+(spec|test).js"
+    ]
+  },
+  "lint-staged": {
+    "src/**/*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  }
+}
